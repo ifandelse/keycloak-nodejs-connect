@@ -49,17 +49,22 @@ module.exports = function (keycloak, spec) {
   }
 
   return function protect (request, response, next) {
+    console.log("inside protect", request.kauth);
     if (request.kauth && request.kauth.grant) {
       if (!guard || guard(request.kauth.grant.access_token, request, response)) {
+        console.log("(protect) calling next");
         return next()
       }
 
+      console.log("(protect) calling accessDenied");
       return keycloak.accessDenied(request, response, next)
     }
 
     if (keycloak.redirectToLogin(request)) {
+      console.log("(protect) calling forceLogin");
       forceLogin(keycloak, request, response)
     } else {
+      console.log("(protect) calling accessDenied");
       return keycloak.accessDenied(request, response, next)
     }
   }
